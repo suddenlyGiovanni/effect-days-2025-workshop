@@ -1,0 +1,12 @@
+node_modules
+.DS_Store
+dist
+*.local
+.direnv
+.vite-inspect
+.remote-assets
+components.d.ts
+.env*
+!.env.example
+scratchpad
+data/

@@ -1,0 +1,69 @@
+{
+  "name": "effect-days-2025-workshop",
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@10.5.1+sha512.c424c076bd25c1a5b188c37bb1ca56cc1e136fbf530d98bcb3289982a08fd25527b8c9c4ec113be5e3393c39af04521dd647bcf1d0801eaf8ac6a7b14da313af",
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open",
+    "export": "slidev export",
+    "check": "tsc -b tsconfig.json",
+    "lint": "eslint \"**/{src,test,examples,scripts,dtslint}/**/*.{ts,mjs}\"",
+    "lint:fix": "pnpm lint --fix",
+    "exercise": "tsx --env-file=.env"
+  },
+  "dependencies": {
+    "@effect/printer": "^0.41.12",
+    "@effect/printer-ansi": "^0.41.12",
+    "@slidev/cli": "^51.4.0",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@effect-rx/rx-react": "^0.31.9",
+    "@effect/eslint-plugin": "^0.3.0",
+    "@effect/experimental": "^0.43.3",
+    "@effect/language-service": "^0.4.0",
+    "@effect/opentelemetry": "^0.44.12",
+    "@effect/platform": "^0.79.3",
+    "@effect/platform-node": "^0.75.3",
+    "@effect/vitest": "^0.19.10",
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.22.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.200.0",
+    "@opentelemetry/sdk-trace-base": "^2.0.0",
+    "@opentelemetry/sdk-trace-node": "^2.0.0",
+    "@tailwindcss/vite": "^4.0.14",
+    "@tanstack/react-query": "^5.69.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.11",
+    "@types/react-dom": "^19.0.4",
+    "@vitest/expect": "^3.0.9",
+    "better-sqlite3": "^11.9.1",
+    "effect": "^3.13.12",
+    "eslint": "^9.22.0",
+    "eslint-import-resolver-typescript": "^4.2.1",
+    "eslint-plugin-import-x": "^4.8.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-sort-destructure-keys": "^2.0.0",
+    "express": "^4.21.2",
+    "openai": "^4.87.3",
+    "prettier": "^3.5.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "tailwindcss": "^4.0.14",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1",
+    "vitest": "^3.0.9"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
+  }
+}
