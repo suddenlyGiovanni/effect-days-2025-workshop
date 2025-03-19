@@ -87,3 +87,7 @@ li > ul {
 .dark .slidev-code-line-numbers .slidev-code code .line::before {
   color: #787f88;
 }
+
+body {
+  cursor: default !important;
+}

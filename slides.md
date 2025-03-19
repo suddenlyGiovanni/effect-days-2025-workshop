@@ -14,6 +14,17 @@ lineNumbers: true
 theme: ./theme
 ---
 
+<h2>
+Wifi: SALA CONVEGNI<br />
+Password: SalaConvegni<br /><br />
+
+Git repository:
+</h2>
+
+`https://github.com/Effect-TS/effect-days-2025-workshop.git`
+
+---
+
 # Effect Days 2025
 
 <div class="text-2xl">
