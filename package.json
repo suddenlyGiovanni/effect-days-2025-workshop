@@ -7,6 +7,7 @@
     "build": "slidev build",
     "dev": "slidev --open",
     "export": "slidev export",
+    "serve": "static-web-server --port 3000 --root ./dist",
     "check": "tsc -b tsconfig.json",
     "lint": "eslint \"**/{src,test,examples,scripts,dtslint}/**/*.{ts,mjs}\"",
     "lint:fix": "pnpm lint --fix",

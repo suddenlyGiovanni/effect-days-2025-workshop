@@ -45,9 +45,9 @@
 
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
-            bun
             corepack
             nodejs
+            static-web-server
           ];
         };
       };
