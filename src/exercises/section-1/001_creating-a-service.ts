@@ -1,4 +1,4 @@
-import type { Effect } from "effect"
+import { Context, type Effect } from "effect"
 
 // The "./shared/domain/*.js" imports provide domain-specific types and errors
 // used across the Pun-ishment Protocol application. They are imported from a
@@ -35,13 +35,21 @@ export interface PunsterClientShape {
   ) => Effect.Effect<string, PunsterFetchError>
 }
 
+export class PunsterClient extends Context.Tag("app/PunsterClient")<PunsterClient, PunsterClientShape>() {
+}
+
 /**
  * The Pun Distribution Network (PDN) is responsible for controlling access to
  * the most optimal communication channels for delivering puns.
  */
 export interface PunDistributionNetworkShape {
-  readonly getChannel: (misbehavior: Misbehavior) => Effect.Effect<Channel, NoChannelAvailableError>
   readonly deliverPun: (pun: Pun, misbehavior: Misbehavior, channel: Channel) => Effect.Effect<string>
+  readonly getChannel: (misbehavior: Misbehavior) => Effect.Effect<Channel, NoChannelAvailableError>
+}
+
+export class PunDistributionNetwork
+  extends Context.Tag("app/PunDistributionNetwork")<PunDistributionNetwork, PunDistributionNetworkShape>()
+{
 }
 
 /**
@@ -50,7 +58,14 @@ export interface PunDistributionNetworkShape {
  * tokens are reset each day at `00:00`.
  */
 export interface ImmunityTokenManagerShape {
+  readonly awardToken: (childName: string, options: {
+    readonly reason: string
+  }) => Effect.Effect<void>
   readonly getBalance: (childName: string) => Effect.Effect<number>
-  readonly awardToken: (childName: string, options: { readonly reason: string }) => Effect.Effect<void>
   readonly useToken: (childName: string) => Effect.Effect<number, NoTokenAvailableError>
+}
+
+export class ImmunityTokenManager
+  extends Context.Tag("app/ImmunityTokenManager")<ImmunityTokenManager, ImmunityTokenManagerShape>()
+{
 }
