@@ -3,6 +3,7 @@ import * as fs from "node:fs/promises"
 
 class CacheMissError extends Data.TaggedError("CacheMissError")<{
   readonly message: string
+  readonly cause?: unknown
 }> {}
 
 class Cache extends Context.Tag("app/Cache")<Cache, {
@@ -27,8 +28,8 @@ const InMemoryCache = Cache.of({
 const FileSystemCache = Cache.of({
   lookup: (key) =>
     Effect.tryPromise({
-      try: () => fs.readFile(`src/demos/session-1/cache/${key}`, "utf-8"),
-      catch: () => new CacheMissError({ message: `Failed to read file for cache key: "${key}"` })
+      try: () => fs.readFile(`./src/demos/section-1/cache/${key}`, "utf-8"),
+      catch: (error) => new CacheMissError({ message: `Failed to read file for cache key: "${key}"`, cause: error })
     })
 })
 
