@@ -40,6 +40,7 @@ export class PunsterClient extends Effect.Service<PunsterClient>()(
 
 // eslint-disable-next-line
 PunsterClient.Default
+//            ^?
 
 export class PunDistributionNetwork extends Effect.Service<PunDistributionNetwork>()("app/PunDistributionNetwork", {
   effect: makePunDistributionNetwork(),

@@ -1,5 +1,6 @@
 // eslint-disable-next-line
-import { Effect } from "effect"
+import { Array, Config, Effect, flow, ParseResult, Random, Schedule } from "effect"
+import { NodeHttpClient } from "@effect/platform-node"
 
 /**
  * Now that you know all about `Effect.Service`, you have decided to use it to
@@ -24,9 +25,34 @@ import { Effect } from "effect"
 
 /* Implement the ImmunityTokenManager service below */
 
+export class ImmunityTokenManager extends Effect.Service<ImmunityTokenManager>()("app/ImmunityTokenManager", {
+  scoped: makeImmunityTokenManager()
+}) {}
+
+// eslint-disable-next-line
+ImmunityTokenManager.Default
+//                    ^?
+
 /* Implement the PunsterClient service below */
+export class PunsterClient extends Effect.Service<PunsterClient>()("app/PunsterClient", {
+  effect: makePunsterClient(),
+  dependencies: [ImmunityTokenManager.Default, NodeHttpClient.layerUndici]
+}) {
+}
+
+// eslint-disable-next-line
+PunsterClient.Default
+//            ^?
 
 /* Implement the PunDistributionNetwork service below */
+export class PunDistributionNetwork extends Effect.Service<PunDistributionNetwork>()("app/PunDistributionNetwork", {
+  effect: makePunDistributionNetwork(),
+  dependencies: [PunsterClient.Default]
+}) {
+}
+
+export const x = PunDistributionNetwork.Default
+//           ^?
 
 // =============================================================================
 // IGNORE SECTION BELOW
@@ -39,7 +65,6 @@ import {
   HttpClientRequest,
   HttpClientResponse
 } from "@effect/platform"
-import { Array, Config, flow, ParseResult, Random, Schedule } from "effect"
 import {
   ChildImmuneError,
   MalformedPunError,
@@ -52,8 +77,9 @@ import {
   ChannelType,
   Misbehavior,
   Pun,
-  PunDeliveryReport,
+  PunDeliveryReport
 } from "./shared/domain/models.js"
+
 /* eslint-enable */
 
 function makeImmunityTokenManager() {
@@ -76,7 +102,9 @@ function makeImmunityTokenManager() {
     )
 
     const awardToken = Effect.fn("ImmunityTokenManager.awardToken")(
-      function*(childName: string, options: { readonly reason: string }) {
+      function*(childName: string, options: {
+        readonly reason: string
+      }) {
         yield* Effect.log(`Awarding immunity token to ${childName} because ${options.reason}`)
         const previous = tokens.get(childName) ?? 0
         tokens.set(childName, previous + 1)
@@ -103,6 +131,7 @@ function makeImmunityTokenManager() {
     } as const
   })
 }
+
 function makePunDistributionNetwork() {
   return Effect.gen(function*() {
     const punsterClient = yield* PunsterClient
@@ -141,7 +170,10 @@ function makePunDistributionNetwork() {
     const deliverPun = Effect.fn("PunDistributionNetwork.deliverPun")(
       function*(pun: Pun, misbehavior: Misbehavior, channel: Channel) {
         yield* Effect.log(`Delivering pun to ${misbehavior.childName} via channel type "${channel.type}"`).pipe(
-          Effect.annotateLogs({ setup: pun.setup, punchline: pun.punchline })
+          Effect.annotateLogs({
+            setup: pun.setup,
+            punchline: pun.punchline
+          })
         )
         return yield* Effect.orDie(punsterClient.evaluatePun(pun, misbehavior, channel))
       }
@@ -199,7 +231,11 @@ function makePunsterClient() {
       function*(pun: Pun, misbehavior: Misbehavior, channel: Channel) {
         yield* Effect.log(`Sending pun for evaluation...`)
         return yield* httpClientOk.post("/puns/evaluate", {
-          body: HttpBody.unsafeJson({ pun, misbehavior, channel })
+          body: HttpBody.unsafeJson({
+            pun,
+            misbehavior,
+            channel
+          })
         }).pipe(
           Effect.flatMap(HttpClientResponse.schemaBodyJson(PunDeliveryReport)),
           Effect.as("Fake Report"),
