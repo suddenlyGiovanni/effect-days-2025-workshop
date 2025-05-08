@@ -1,4 +1,4 @@
-import type { Layer } from "effect"
+import { Layer } from "effect"
 
 /**
  * **Todo List**:
@@ -34,7 +34,7 @@ export declare const NotificationLayer: Layer.Layer<"Notification", "NotifyError
 
 // Target: Layer<"Config" | "Logging", "ConfigError" | "LogError", never>
 
-export const exercise1 = null // Your solution here
+export const exercise1 = LoggingLayer.pipe(Layer.provideMerge(ConfigLayer))
 
 // ===========================
 // Exercise 2
@@ -42,7 +42,7 @@ export const exercise1 = null // Your solution here
 
 // Target: Layer<"Database", "DbError" | "ConfigError", never>
 
-export const exercise2 = null // Your solution here
+export const exercise2 = Layer.provide(DatabaseLayer, ConfigLayer) // Your solution here
 
 // ===========================
 // Exercise 3
@@ -50,7 +50,11 @@ export const exercise2 = null // Your solution here
 
 // Target: Layer<"Cache", "CacheError" | "DbError" | "ConfigError", never>
 
-export const exercise3 = null // Your solution here
+export const exercise3 = CacheLayer.pipe(
+  // Your solution here
+  Layer.provide(DatabaseLayer),
+  Layer.provide(ConfigLayer)
+)
 
 // ===========================
 // Exercise 4
@@ -58,7 +62,7 @@ export const exercise3 = null // Your solution here
 
 // Target: Layer<"Auth", "AuthError" | "ConfigError" | "DbError", never>
 
-export const exercise4 = null // Your solution here
+export const exercise4 = AuthLayer.pipe(Layer.provide(Layer.merge(ConfigLayer, exercise2))) // Your solution here
 
 // ===========================
 // Exercise 5
@@ -66,7 +70,10 @@ export const exercise4 = null // Your solution here
 
 // Target: Layer<"Api", "ApiError" | "AuthError" | "CacheError" | "DbError" | "ConfigError", never>
 
-export const exercise5 = null // Your solution here
+export const exercise5 = ApiLayer.pipe(
+  // Your solution here
+  Layer.provide(Layer.merge(exercise3, exercise4))
+)
 
 // ===========================
 // Exercise 6
@@ -74,7 +81,11 @@ export const exercise5 = null // Your solution here
 
 // Target: Layer<"Metrics" | "Logging", "MetricsError" | "LogError" | "ConfigError", never>
 
-export const exercise6 = null // Your solution here
+export const exercise6 = Layer.provideMerge(
+  // Your solution here
+  MetricsLayer,
+  Layer.provide(LoggingLayer, ConfigLayer)
+)
 
 // ===========================
 // Exercise 7
@@ -82,7 +93,11 @@ export const exercise6 = null // Your solution here
 
 // Target: Layer<"Metrics" | "Notification", "MetricsError" | "NotifyError" | "LogError" | "ConfigError", never>
 
-export const exercise7 = null // Your solution here
+export const exercise7 = Layer.merge(
+  // Your solution here
+  MetricsLayer,
+  NotificationLayer
+).pipe(Layer.provide(Layer.provideMerge(LoggingLayer, ConfigLayer)))
 
 // ===========================
 // Exercise 8
@@ -92,10 +107,29 @@ export const exercise7 = null // Your solution here
 // service in the `Layer` output first, and then combining those layers to
 // create your final layer.
 
-// Target: Layer<
-//   "Api" | "Metrics" | "Notification",
-//   "ApiError" | "AuthError" | "CacheError" | "DbError" | "ConfigError" | "MetricsError" | "NotifyError" | "LogError",
-//   never
-// >
+const databaseConfigLayer = Layer.provideMerge(DatabaseLayer, ConfigLayer)
+const cacheWithDatabaseLayer = Layer.provideMerge(CacheLayer, databaseConfigLayer)
+const authWithCacheLayer = Layer.provideMerge(AuthLayer, cacheWithDatabaseLayer)
+const loggingWithConfigLayer = Layer.provideMerge(LoggingLayer, ConfigLayer)
 
-export const exercise8 = null // Your solution here
+const Api = Layer.provide(ApiLayer, authWithCacheLayer)
+const Metrics = Layer.provide(MetricsLayer, loggingWithConfigLayer)
+const Notification = Layer.provideMerge(NotificationLayer, loggingWithConfigLayer)
+
+/**
+ * Target: Layer<
+ *   "Api" | "Metrics" | "Notification",
+ *   "ApiError" | "AuthError" | "CacheError" | "DbError" | "ConfigError" | "MetricsError" | "NotifyError" | "LogError",
+ *   never
+ * >
+ */
+export const exercise8: Layer.Layer<
+  "Api" | "Metrics" | "Notification",
+  "ApiError" | "AuthError" | "CacheError" | "DbError" | "ConfigError" | "MetricsError" | "NotifyError" | "LogError",
+  never
+> = Layer.mergeAll(
+  // Your solution here
+  Api,
+  Metrics,
+  Notification
+)
