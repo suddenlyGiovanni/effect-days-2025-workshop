@@ -1,3 +1,6 @@
+import { NodeHttpClient } from "@effect/platform-node"
+import { Layer } from "effect"
+
 // The shared service modules also export pre-defined constructors, given that
 // we don't need to know how the services are implemented to use them
 import { ImmunityTokenManager, makeImmunityTokenManager } from "./shared/services/ImmunityTokenManager.js"
@@ -33,10 +36,20 @@ import { makePunsterClient, PunsterClient } from "./shared/services/PunsterClien
  */
 
 /* Uncomment the below to implement */
-// export const ImmunityTokenManagerLayer =
+export const ImmunityTokenManagerLayer = Layer.effect(ImmunityTokenManager, makeImmunityTokenManager)
 
 /* Uncomment the below to implement */
-// export const PunsterClientLayer =
+export const PunsterClientLayer = Layer.effect(PunsterClient, makePunsterClient).pipe(
+  Layer.provide(ImmunityTokenManagerLayer)
+)
 
 /* Uncomment the below to implement */
-// export const PunDistributionNetworkLayer =
+export const PunDistributionNetworkLayer = Layer.effect(PunDistributionNetwork, makePunDistributionNetwork).pipe(
+  Layer.provide(PunsterClientLayer)
+)
+
+export const MainLayer = Layer.mergeAll(
+  ImmunityTokenManagerLayer,
+  PunsterClientLayer,
+  PunDistributionNetworkLayer
+).pipe(Layer.provide(NodeHttpClient.layerUndici))
