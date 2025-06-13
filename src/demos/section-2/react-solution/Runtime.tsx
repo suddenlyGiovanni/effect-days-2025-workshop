@@ -1,5 +1,5 @@
 import type { QueryFunctionContext } from "@tanstack/react-query"
-import { ConfigProvider, Effect, Layer, ManagedRuntime } from "effect"
+import { ConfigProvider, Data, Effect, Equal, Layer, ManagedRuntime } from "effect"
 import * as React from "react"
 
 const memoMap = Effect.runSync(Layer.makeMemoMap)
@@ -13,32 +13,53 @@ export const makeReactRuntime = <
   E,
   Args extends Record<string, unknown> = {}
 >(
-  layer: (options: Args) => Layer.Layer<R, E>
+  layer: (options: Args) => Layer.Layer<R, E>,
+  options?: {
+    readonly disposeTimeout?: number | undefined
+  }
 ) => {
   const Context = React.createContext<ManagedRuntime.ManagedRuntime<R, E>>(
     null as any
   )
   const Provider = (args: Args & { readonly children?: React.ReactNode }) => {
-    const deps: Array<unknown> = []
+    const deps: Array<unknown> = Data.unsafeArray([]) as any
     for (const key of Object.keys(args).sort()) {
       if (key === "children") continue
       deps.push(args[key])
     }
-    const runtime = React.useMemo(
-      () =>
-        ManagedRuntime.make(
-          Layer.provideMerge(layer(args), ViteConfigProvider),
+    const runtimeRef = React.useRef<{
+      readonly args: Array<unknown>
+      readonly runtime: ManagedRuntime.ManagedRuntime<R, E>
+      timeout: number | undefined
+    }>(undefined as any)
+    if (!runtimeRef.current || !Equal.equals(runtimeRef.current.args, deps)) {
+      runtimeRef.current = {
+        args: deps,
+        runtime: ManagedRuntime.make(
+          Layer.provideMerge(layer(deps as any), ViteConfigProvider),
           memoMap
         ),
-      deps
+        timeout: undefined
+      }
+    }
+    React.useEffect(() => {
+      const ref = runtimeRef.current
+      if (ref.timeout) {
+        clearTimeout(ref.timeout)
+        ref.timeout = undefined
+      }
+      return () => {
+        ref.timeout = setTimeout(
+          () => ref.runtime.dispose(),
+          options?.disposeTimeout ?? 500
+        ) as any
+      }
+    }, [runtimeRef.current])
+    return (
+      <Context.Provider value={runtimeRef.current.runtime}>
+        {args.children}
+      </Context.Provider>
     )
-    React.useEffect(
-      () => () => {
-        runtime.dispose()
-      },
-      [runtime]
-    )
-    return <Context.Provider value={runtime}>{args.children}</Context.Provider>
   }
 
   const use = () => React.useContext(Context)

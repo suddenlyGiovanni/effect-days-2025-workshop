@@ -1,12 +1,14 @@
-import * as NodeSdk from "@effect/opentelemetry/NodeSdk"
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http"
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base"
+import * as OtlpTracer from "@effect/opentelemetry/OtlpTracer"
+import * as Resource from "@effect/opentelemetry/Resource"
+import { NodeHttpClient } from "@effect/platform-node"
+import { Layer } from "effect"
 
-export const TracingLayer = NodeSdk.layer(() => ({
-  resource: {
-    serviceName: "effect-days-25"
-  },
-  spanProcessor: new BatchSpanProcessor(
-    new OTLPTraceExporter({ url: "http://localhost:4318/v1/traces" })
-  )
-}))
+const ResourceLayer = Resource.layer({
+  serviceName: "effect-days-25"
+})
+
+export const TracingLayer = OtlpTracer.layer({
+  url: "http://localhost:4318/v1/traces"
+}).pipe(
+  Layer.provide([ResourceLayer, NodeHttpClient.layerUndici])
+)
